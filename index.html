@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invernadero cognitivo con pH y reporte bilingüe</title>
+<style>
+  :root {
+    --verde:#2e7d4f; --verde-2:#3fa56a; --oscuro:#14301f; --claro:#eef6f0;
+    --texto:#20302a; --borde:#d5e3d9; --sombra:0 10px 30px rgba(20,48,31,.12);
+    --radio:14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior:smooth; scroll-padding-top:76px; }
+  body { margin:0; font-family:"Segoe UI", Calibri, Arial, sans-serif; color:var(--texto); line-height:1.7; background:#f6faf7; }
+
+  /* ---------- Header ---------- */
+  header {
+    position:relative; color:#fff; padding:64px 20px 56px; overflow:hidden;
+    background:radial-gradient(1200px 500px at 15% -10%, rgba(63,165,106,.55), transparent 60%),
+               linear-gradient(135deg,#14301f 0%,#1d3b2a 55%,#2e7d4f 100%);
+  }
+  header::after {
+    content:""; position:absolute; inset:0; opacity:.12; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.6) 1px, transparent 1px);
+    background-size:22px 22px;
+  }
+  header .in, main, footer .in { max-width:960px; margin:0 auto; position:relative; z-index:1; }
+  header h1 { margin:0 0 10px; font-size:clamp(1.6rem,3.4vw,2.4rem); letter-spacing:-.5px; line-height:1.2; }
+  header p { margin:4px 0; color:#cfe8d8; }
+  .badge {
+    display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.22); padding:5px 14px; border-radius:999px;
+    font-size:.8rem; letter-spacing:.4px; text-transform:uppercase; margin-bottom:16px;
+  }
+  .badge .dot { width:8px; height:8px; border-radius:50%; background:#7ff0a8; box-shadow:0 0 0 4px rgba(127,240,168,.25); }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position:sticky; top:0; z-index:50;
+    background:rgba(46,125,79,.97); backdrop-filter:blur(8px);
+    box-shadow:0 4px 18px rgba(20,48,31,.22);
+  }
+  nav .in { max-width:960px; margin:0 auto; display:flex; align-items:center; gap:6px; padding:0 20px; }
+  .marca { color:#fff; font-weight:700; font-size:.95rem; margin-right:auto; padding:14px 0; display:flex; align-items:center; gap:9px; }
+  .marca span { font-size:1.25rem; }
+  .menu { display:flex; align-items:center; gap:2px; }
+  .menu > .item { position:relative; }
+  .menu > .item > a {
+    display:inline-block; color:#fff; text-decoration:none; font-size:.9rem; padding:16px 12px;
+    border-radius:9px; transition:background .2s, color .2s; white-space:nowrap;
+  }
+  .menu > .item > a:hover { background:rgba(255,255,255,.16); }
+  .menu > .item.activo > a { background:rgba(255,255,255,.22); box-shadow:inset 0 -3px 0 #a8f0c6; }
+  .caret { font-size:.65rem; margin-left:5px; transition:transform .25s; display:inline-block; }
+  .item:hover .caret { transform:rotate(180deg); }
+
+  /* submenú desplegable */
+  .submenu {
+    position:absolute; top:100%; left:0; min-width:250px; background:#fff; border-radius:12px;
+    box-shadow:var(--sombra); padding:8px; opacity:0; visibility:hidden; transform:translateY(10px);
+    transition:opacity .22s, transform .22s, visibility .22s; border:1px solid var(--borde);
+  }
+  .item:hover .submenu, .item:focus-within .submenu { opacity:1; visibility:visible; transform:translateY(6px); }
+  .submenu a {
+    display:flex; align-items:flex-start; gap:10px; color:var(--texto); text-decoration:none;
+    padding:10px 12px; border-radius:9px; font-size:.88rem; transition:background .18s, transform .18s;
+  }
+  .submenu a:hover { background:var(--claro); transform:translateX(3px); }
+  .submenu a i { font-style:normal; font-size:1.05rem; line-height:1.3; }
+  .submenu a small { display:block; color:#5c7568; font-size:.76rem; }
+
+  /* hamburguesa */
+  .burger { display:none; background:none; border:0; color:#fff; font-size:1.6rem; cursor:pointer; padding:6px 4px; margin-left:auto; }
+
+  /* ---------- Main ---------- */
+  main { padding:24px 20px 60px; }
+  section { scroll-margin-top:76px; }
+  h2 {
+    color:var(--oscuro); font-size:1.5rem; margin-top:52px; padding-bottom:8px; position:relative;
+    border-bottom:2px solid var(--borde);
+  }
+  h2::before {
+    content:""; position:absolute; left:0; bottom:-2px; width:64px; height:2px; background:var(--verde);
+  }
+  h2 .num {
+    display:inline-grid; place-items:center; width:34px; height:34px; background:var(--verde); color:#fff;
+    border-radius:10px; font-size:.9rem; margin-right:12px; vertical-align:middle; box-shadow:0 4px 10px rgba(46,125,79,.35);
+  }
+  h3 { color:var(--verde); margin:26px 0 6px; font-size:1.12rem; }
+  p { margin:12px 0; }
+
+  /* tarjetas */
+  .card {
+    background:#fff; border:1px solid var(--borde); border-radius:var(--radio); padding:20px 22px;
+    box-shadow:0 6px 20px rgba(20,48,31,.06); margin:18px 0;
+  }
+  .grid { display:grid; gap:16px; }
+  .grid-2 { grid-template-columns:1fr 1fr; }
+  .grid-3 { grid-template-columns:repeat(3,1fr); }
+
+  table { border-collapse:separate; border-spacing:0; width:100%; margin:18px 0; font-size:.93rem; border-radius:12px; overflow:hidden; box-shadow:0 6px 20px rgba(20,48,31,.07); }
+  th, td { border-bottom:1px solid var(--borde); padding:11px 14px; text-align:left; vertical-align:top; }
+  th { background:var(--oscuro); color:#fff; font-weight:600; }
+  tr:last-child td { border-bottom:0; }
+  tbody tr:nth-child(even) td, table tr:nth-child(even) td { background:var(--claro); }
+  tbody tr:hover td, table tr:hover td { background:#e2f0e7; }
+
+  figure { margin:22px 0; text-align:center; }
+  figure img {
+    max-width:100%; border:1px solid var(--borde); border-radius:12px;
+    box-shadow:var(--sombra); transition:transform .3s, box-shadow .3s;
+  }
+  figure img:hover { transform:translateY(-4px) scale(1.01); box-shadow:0 18px 40px rgba(20,48,31,.22); }
+  figcaption { font-size:.85rem; color:#5c7568; margin-top:10px; font-style:italic; }
+
+  .caja { background:linear-gradient(180deg,#eef6f0,#e4f1e8); border-left:5px solid var(--verde); padding:14px 18px; margin:20px 0; border-radius:0 12px 12px 0; }
+  .descarga { background:linear-gradient(180deg,#fffdf5,#fff8e1); border:2px dashed #e0a800; padding:20px; border-radius:var(--radio); margin:22px 0; }
+  a.btn {
+    display:inline-block; background:var(--verde); color:#fff; text-decoration:none; padding:11px 22px;
+    border-radius:10px; font-weight:600; margin-top:10px; transition:background .2s, transform .2s; box-shadow:0 6px 16px rgba(46,125,79,.35);
+  }
+  a.btn:hover { background:var(--verde-2); transform:translateY(-2px); }
+  code, pre { font-family:Consolas,"Courier New",monospace; background:#f0f2f0; border-radius:6px; }
+  code { padding:2px 6px; font-size:.88em; }
+  pre { padding:16px; overflow-x:auto; font-size:.85rem; border:1px solid var(--borde); background:#12261a; color:#d8f0e0; }
+  pre code { background:none; color:inherit; padding:0; }
+
+  .pasos { counter-reset:paso; display:grid; gap:14px; margin:18px 0; }
+  .paso { position:relative; padding:16px 18px 16px 64px; background:#fff; border:1px solid var(--borde); border-radius:12px; box-shadow:0 6px 18px rgba(20,48,31,.06); }
+  .paso::before {
+    counter-increment:paso; content:counter(paso); position:absolute; left:16px; top:16px;
+    width:34px; height:34px; display:grid; place-items:center; background:var(--verde); color:#fff;
+    border-radius:10px; font-weight:700;
+  }
+  .paso strong { color:var(--oscuro); }
+
+  ul.lista { padding-left:0; list-style:none; }
+  ul.lista li { position:relative; padding:8px 0 8px 30px; margin:2px 0; }
+  ul.lista li::before { content:"✓"; position:absolute; left:0; top:8px; color:var(--verde); font-weight:800; }
+
+  .etica li { padding:12px 0 12px 30px; }
+
+  footer { background:var(--oscuro); color:#bcdcc9; padding:30px 20px; font-size:.9rem; text-align:center; }
+  footer .in { max-width:960px; margin:0 auto; }
+
+  #arriba {
+    position:fixed; right:22px; bottom:22px; width:48px; height:48px; border-radius:50%;
+    background:var(--verde); color:#fff; border:0; font-size:1.3rem; cursor:pointer; z-index:60;
+    box-shadow:0 10px 24px rgba(20,48,31,.35); opacity:0; visibility:hidden; transition:opacity .3s, transform .3s, visibility .3s;
+  }
+  #arriba.ver { opacity:1; visibility:visible; }
+  #arriba:hover { transform:translateY(-4px); background:var(--verde-2); }
+
+  .reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.ver { opacity:1; transform:none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:860px){
+    .burger { display:block; }
+    nav .in { flex-wrap:wrap; }
+    .menu { display:none; flex-direction:column; width:100%; align-items:stretch; padding-bottom:12px; }
+    .menu.abierto { display:flex; }
+    .menu > .item { width:100%; }
+    .menu > .item > a { display:block; padding:13px 10px; }
+    .caret { float:right; }
+    .submenu {
+      position:static; opacity:1; visibility:visible; transform:none; box-shadow:none; border:0;
+      background:rgba(255,255,255,.08); margin:0 0 6px; max-height:0; overflow:hidden; padding:0 8px;
+      transition:max-height .3s, padding .3s;
+    }
+    .submenu a { color:#eafaf0; }
+    .submenu a small { color:#bcdcc9; }
+    .submenu a:hover { background:rgba(255,255,255,.14); }
+    .item.abierto .submenu { max-height:420px; padding:8px; }
+    .grid-2, .grid-3 { grid-template-columns:1fr; }
+    header { padding:48px 20px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="in">
+    <span class="badge"><span class="dot"></span>Computación cognitiva · Actividad 6</span>
+    <h1>Invernadero cognitivo: monitoreo con pH y reporte en dos idiomas</h1>
+    <p>Computación cognitiva en Big Data · Análisis de datos con sistemas inteligentes</p>
+    <p>Equipo: [Nombre integrante 1], [Nombre integrante 2], [Nombre integrante 3] · Octubre de 2026</p>
+  </div>
+</header>
+
+<nav>
+  <div class="in">
+    <div class="marca"><span>🌱</span> Invernadero cognitivo</div>
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <div class="menu" id="menu">
+      <div class="item"><a href="#resumen">Resumen</a></div>
+      <div class="item">
+        <a href="#caso">Proyecto <span class="caret">▼</span></a>
+        <div class="submenu">
+          <a href="#caso"><i>🌿</i><span>El caso<small>Contexto del invernadero</small></span></a>
+          <a href="#cognitivo"><i>🧠</i><span>Sistema cognitivo<small>Cómo interpreta los datos</small></span></a>
+        </div>
+      </div>
+      <div class="item">
+        <a href="#ph">Aportes <span class="caret">▼</span></a>
+        <div class="submenu">
+          <a href="#ph"><i>💧</i><span>Variable pH<small>Nueva medición y rangos</small></span></a>
+          <a href="#idioma"><i>🌐</i><span>Segundo idioma<small>Reporte en inglés</small></span></a>
+        </div>
+      </div>
+      <div class="item">
+        <a href="#resultados">Resultados <span class="caret">▼</span></a>
+        <div class="submenu">
+          <a href="#resultados"><i>📊</i><span>Simulación<small>48 horas de lectura</small></span></a>
+          <a href="#etica"><i>⚖️</i><span>Uso responsable<small>Límites y transparencia</small></span></a>
+        </div>
+      </div>
+      <div class="item"><a href="#conclusiones">Conclusiones</a></div>
+      <div class="item"><a href="#descarga">Descarga</a></div>
+      <div class="item"><a href="#referencias">Referencias</a></div>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<section id="resumen" class="reveal">
+<h2><span class="num">1</span>Resumen</h2>
+<p>Una empresa que administra un invernadero ya tenía un proyecto de monitoreo y nos pidió completarlo con dos cosas: medir el <strong>pH</strong>, una variable que todavía no incluía, y generar el reporte del estado del invernadero también en <strong>inglés</strong>. Hicimos ambas cosas en una aplicación de escritorio en Python que lee las variables, las compara con el rango ideal del cultivo, detecta tendencias y saltos extraños, y escribe un informe con recomendaciones en español o en inglés.</p>
+<div class="caja">Los datos de esta página son <strong>simulados</strong> y los rangos son valores de referencia para cada cultivo. No reemplazan la medición real ni la opinión de un agrónomo.</div>
+</section>
+
+<section id="caso" class="reveal">
+<h2><span class="num">2</span>El caso</h2>
+<p>El invernadero tiene sensores que miden cada hora la temperatura, la humedad del aire, la humedad del suelo y la luz. El problema es que revisar gráficas todo el día no es práctico: alguien tiene que darse cuenta de que algo se salió de rango, entender por qué importa y decidir qué hacer. La empresa quiere que el sistema haga ese trabajo y lo explique en un reporte que pueda leer también su socio extranjero, por eso el pedido del inglés.</p>
+<p>El pH importa porque determina qué tanto puede absorber la planta de los nutrientes disueltos en el agua de riego. Si el pH se sale de rango, la planta puede mostrar deficiencias aunque el abono esté presente. Por eso la empresa lo quería dentro del monitoreo.</p>
+</section>
+
+<section id="cognitivo" class="reveal">
+<h2><span class="num">3</span>Por qué lo llamamos un sistema cognitivo</h2>
+<p>Un sistema cognitivo no se limita a guardar datos: los interpreta de forma parecida a como lo haría una persona con experiencia y explica lo que concluye. En nuestro caso trabaja en cuatro pasos.</p>
+<div class="pasos">
+  <div class="paso"><strong>Percibe</strong> — Recibe las lecturas de los cinco sensores. <em>Ejemplo: pH = 7,71 a las 23:00.</em></div>
+  <div class="paso"><strong>Interpreta</strong> — Compara cada valor con el rango ideal y el rango crítico del cultivo. <em>Ejemplo: para tomate el pH ideal es 6,0 a 6,8; 7,71 está por encima del límite crítico (7,5).</em></div>
+  <div class="paso"><strong>Aprende del historial</strong> — Calcula la tendencia de las últimas 6 lecturas y detecta saltos bruscos. <em>Ejemplo: el pH lleva horas subiendo, no es un error de lectura, es una deriva.</em></div>
+  <div class="paso"><strong>Recomienda y comunica</strong> — Elige acciones según el estado y redacta el reporte en el idioma pedido. <em>Ejemplo: «Bajar el pH con ácido diluido en dosis pequeñas y volver a medir».</em></div>
+</div>
+<p>Es un sistema basado en reglas y estadística sencilla, no un modelo entrenado con aprendizaje automático. Lo elegimos así porque las reglas se pueden explicar y revisar con el agrónomo, y porque no teníamos un historial real para entrenar. A futuro se podría reemplazar la parte de interpretación por un modelo entrenado con datos del propio invernadero.</p>
+</section>
+
+<section id="ph" class="reveal">
+<h2><span class="num">4</span>Lo que agregamos 1: la variable pH</h2>
+<p>El pH entró igual que las otras variables: tiene su sensor (en la simulación, una lectura por hora), su gráfica con la franja verde del rango ideal, su estado (óptimo, bajo, alto o crítico), su tendencia y sus recomendaciones. Los rangos dependen del cultivo, así que la aplicación tiene un selector con tres:</p>
+<table>
+  <tr><th>Cultivo</th><th>pH ideal</th><th>pH crítico (fuera de)</th><th>Temperatura ideal (°C)</th></tr>
+  <tr><td>Tomate</td><td>6,0 a 6,8</td><td>5,0 a 7,5</td><td>18 a 27</td></tr>
+  <tr><td>Lechuga</td><td>5,8 a 6,5</td><td>5,0 a 7,2</td><td>15 a 24</td></tr>
+  <tr><td>Fresa</td><td>5,5 a 6,5</td><td>4,8 a 7,2</td><td>15 a 26</td></tr>
+</table>
+<p>Cuando el pH está alto la recomendación es bajarlo con un ácido diluido en dosis pequeñas y volver a medir, y cuando está bajo, subirlo con una base suave. En ambos casos se pide revisar el origen (calidad del agua de riego o solución nutritiva), porque corregir el número sin buscar la causa solo aplaza el problema.</p>
+</section>
+
+<section id="idioma" class="reveal">
+<h2><span class="num">5</span>Lo que agregamos 2: el reporte en inglés</h2>
+<p>Para no duplicar código, todos los textos que ve la persona (nombres de variables, estados, tendencias, recomendaciones y el formato del informe) viven en un diccionario con una entrada para cada idioma. La lógica del sistema es una sola y el idioma solo cambia la redacción. Esto tiene una ventaja: agregar un tercer idioma consiste en copiar el diccionario y traducirlo. En la ventana se cambia con el selector «Idioma del reporte» y al exportar se guardan los dos informes, <code>reporte_es.txt</code> y <code>reporte_en.txt</code>.</p>
+<pre><code>ES:  Estado general: ALERTA
+     pH   7.71   6 - 6.8   Crítico alto   subiendo
+EN:  Overall status: ALERT
+     pH   7.71   6 - 6.8   Critically high   rising</code></pre>
+</section>
+
+<section id="resultados" class="reveal">
+<h2><span class="num">6</span>Resultados</h2>
+<h3>Simulación de 48 horas</h3>
+<p>Simulamos dos días de lecturas para el cultivo de tomate e incluimos a propósito dos problemas: una ola de calor (horas 36 a 40) y un pH que empieza a subir desde la hora 30, como pasaría si el agua de riego estuviera volviéndose alcalina.</p>
+<figure><img src="img/monitor_es.png" alt="Aplicación mostrando las cinco gráficas y el reporte en español"><figcaption>Figura 1. Aplicación con el reporte en español al final de la simulación (hora 47).</figcaption></figure>
+<table>
+  <tr><th>Hora simulada</th><th>Qué pasó</th><th>Estado general</th></tr>
+  <tr><td>0 a 33</td><td>Todo dentro de rango; la temperatura sube y baja con el día.</td><td>Óptimo, con algún aviso breve</td></tr>
+  <tr><td>34 (15 oct, 10:00)</td><td>El pH llega a 6,84 y sale del rango ideal.</td><td>Atención</td></tr>
+  <tr><td>36 a 40</td><td>Ola de calor: la temperatura llega a unos 32 o 33 °C. El sistema marca el salto como lectura atípica.</td><td>Atención</td></tr>
+  <tr><td>45 (15 oct, 21:00)</td><td>El pH llega a 7,51 y cruza el límite crítico.</td><td><strong>Alerta</strong></td></tr>
+  <tr><td>47 (15 oct, 23:00)</td><td>pH de 7,71 y subiendo; la recomendación es bajar el pH con ácido diluido.</td><td><strong>Alerta</strong></td></tr>
+</table>
+<p>Algo que corregimos durante las pruebas: al principio el sistema marcaba alerta cada amanecer y atardecer porque la luz baja de forma natural. Ahora la luz solo se evalúa cuando el sol está alto (de 8:00 a 16:00) y fuera de ese horario aparece como «No aplica». También vimos que tomar la subida normal de la mañana como lectura atípica era un error; ahora solo se marcan los saltos bruscos respecto a los cambios recientes, y se excluyen la luz y la humedad del suelo, que tienen saltos normales (el día y el riego).</p>
+
+<h3>El mismo estado en inglés</h3>
+<figure><img src="img/monitor_en.png" alt="Aplicación con el reporte en inglés"><figcaption>Figura 2. El mismo estado con el reporte en inglés. Cambian los textos; las gráficas y el análisis son iguales.</figcaption></figure>
+
+<h3>Prueba con una lectura manual</h3>
+<p>También se puede escribir una lectura a mano. Probamos con una lectura que simula una falla en el invernadero: temperatura de 41 °C, humedad del aire de 45 % y pH de 5,4.</p>
+<figure><img src="img/lectura_manual.png" alt="Aplicación con una lectura manual anormal"><figcaption>Figura 3. Lectura manual anormal: tres recomendaciones y tres lecturas atípicas.</figcaption></figure>
+<p>El sistema respondió con alerta general, tres recomendaciones (ventilar, nebulizar y subir el pH) y avisó que la temperatura, la humedad y el pH saltaron de golpe respecto a las horas anteriores, por lo que conviene revisar los sensores. Ese último aviso es útil: una lectura de 41 °C puede ser un incendio de calor o un sensor dañado, y la persona debe revisar cuál de las dos.</p>
+</section>
+
+<section id="etica" class="reveal">
+<h2><span class="num">7</span>Uso responsable de los resultados</h2>
+<ul class="lista etica">
+  <li><strong>Datos simulados:</strong> los gráficos y las alertas de esta página no corresponden a un invernadero real y no deben citarse como mediciones.</li>
+  <li><strong>Rangos de referencia:</strong> los valores ideales por cultivo son típicos y hay que validarlos con un agrónomo para cada variedad y sistema de riego.</li>
+  <li><strong>Dosis:</strong> el sistema recomienda la dirección de la corrección (subir o bajar el pH) pero no calcula cantidades; esa decisión es de una persona con conocimiento técnico.</li>
+  <li><strong>Falsas alarmas:</strong> un sistema que alerta de más termina ignorado, por eso ajustamos las reglas de luz y de lecturas atípicas.</li>
+  <li><strong>Transparencia:</strong> como las reglas están escritas en el código y en el diccionario de textos, cualquiera puede revisar por qué el sistema dio una recomendación.</li>
+</ul>
+</section>
+
+<section id="conclusiones" class="reveal">
+<h2><span class="num">8</span>Conclusiones</h2>
+<ul class="lista">
+  <li>Incorporar el pH fue sencillo porque la aplicación trata todas las variables con el mismo mecanismo (rango, estado, tendencia, recomendación); lo que cambió fue añadir sus límites por cultivo y sus textos.</li>
+  <li>Separar la lógica de la redacción hizo que el soporte del inglés no duplicara el trabajo y deja la puerta abierta a más idiomas.</li>
+  <li>Las pruebas mostraron que lo más difícil de un sistema de alertas no es detectar problemas sino evitar las falsas alarmas.</li>
+  <li>El siguiente paso sería conectarlo a sensores reales y reemplazar las reglas fijas por un modelo entrenado con el historial del invernadero, manteniendo la explicación de cada recomendación.</li>
+</ul>
+</section>
+
+<section id="descarga" class="reveal">
+<h2><span class="num">9</span>Descarga del proyecto</h2>
+<div class="descarga">
+  <strong>Enlace de descarga:</strong> <a href="ENLACE_DE_DESCARGA">[PEGAR AQUÍ EL ENLACE DE GOOGLE DRIVE CON PERMISOS PARA TODOS]</a><br>
+  Contiene <code>invernadero_cognitivo_gui.py</code> y el manual de usuario. Requisitos: Python 3.9 o superior, <code>pip install numpy matplotlib</code>. Ejecución: <code>python invernadero_cognitivo_gui.py</code>.
+  <br><a class="btn" href="ENLACE_DE_DESCARGA">Descargar el proyecto</a>
+</div>
+</section>
+
+<section id="referencias" class="reveal">
+<h2><span class="num">10</span>Referencias</h2>
+<p>CENTRUM PUCP. (2017). <em>IBM Perú y su Transformación Digital en la Era Cognitiva – XII Semana Internacional</em> [Video]. YouTube.</p>
+<p>DW Español. (2021). <em>La ciudad que lo sabe todo sobre ti | Big Data: ciudades del futuro</em> [Video]. YouTube.</p>
+</section>
+
+</main>
+
+<footer>
+  <div class="in">Computación cognitiva en Big Data · Actividad 6 · Informe del equipo [Nombre integrante 1], [Nombre integrante 2], [Nombre integrante 3].</div>
+</footer>
+
+<button id="arriba" aria-label="Volver arriba">↑</button>
+
+<script>
+  // Menú hamburguesa
+  var burger = document.getElementById('burger');
+  var menu = document.getElementById('menu');
+  burger.addEventListener('click', function () {
+    var abierto = menu.classList.toggle('abierto');
+    burger.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    burger.textContent = abierto ? '✕' : '☰';
+  });
+
+  // Submenús en móvil (toggle)
+  document.querySelectorAll('.menu > .item').forEach(function (item) {
+    var enlace = item.querySelector('a');
+    if (item.querySelector('.submenu')) {
+      enlace.addEventListener('click', function (e) {
+        if (window.innerWidth <= 860) {
+          e.preventDefault();
+          item.classList.toggle('abierto');
+        }
+      });
+    }
+  });
+
+  // Cerrar menú al hacer clic en un enlace
+  menu.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      if (window.innerWidth <= 860 && !a.parentElement.querySelector('.submenu')) {
+        menu.classList.remove('abierto');
+        burger.textContent = '☰';
+      }
+    });
+  });
+
+  // Scroll spy: marcar sección activa
+  var items = Array.prototype.slice.call(document.querySelectorAll('.menu > .item'));
+  var secciones = items.map(function (it) {
+    var href = it.querySelector('a').getAttribute('href');
+    return document.querySelector(href);
+  }).filter(Boolean);
+
+  function activar(id) {
+    items.forEach(function (it) {
+      var href = it.querySelector('a').getAttribute('href');
+      it.classList.toggle('activo', href === '#' + id);
+    });
+  }
+  var obs = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) activar(en.target.id);
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' });
+  secciones.forEach(function (s) { obs.observe(s); });
+
+  // Botón volver arriba
+  var arriba = document.getElementById('arriba');
+  window.addEventListener('scroll', function () {
+    arriba.classList.toggle('ver', window.scrollY > 500);
+  });
+  arriba.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Animación de aparición
+  var rev = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add('ver'); rev.unobserve(en.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(function (el) { rev.observe(el); });
+</script>
+</body>
+</html>
